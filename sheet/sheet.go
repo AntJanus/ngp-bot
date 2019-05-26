@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/AntJanus/ngp-bot/config"
-	"github.com/schollz/closestmatch"
+	"github.com/lithammer/fuzzysearch/fuzzy"
 )
 
 var apiURL = "https://sheets.googleapis.com/v4/spreadsheets/%s/values/%s?key=%s"
@@ -107,11 +107,20 @@ func ReadSheet(gameName string) (RowStruct, error) {
 		gameListing = val
 		gameListing.ExactMatch = true
 	} else {
-		bagSizes := []int{2, 3, 4}
+		findResult := fuzzy.RankFindFold(gameName, gameTitles)
 
-		cm := closestmatch.New(gameTitles, bagSizes)
-		fmt.Println(cm.AccuracyMutatingWords())
-		gameMatch := cm.Closest(gameName)
+		fmt.Println("Results")
+		fmt.Println(findResult)
+		if len(findResult) == 0 {
+			return RowStruct{}, nil
+		}
+
+		firstResult := findResult[0]
+		gameMatch := firstResult.Target
+		matchAccuracy := firstResult.Distance
+
+		fmt.Println(matchAccuracy)
+
 		gameListing = sheetMap[strings.ToLower(gameMatch)]
 	}
 
