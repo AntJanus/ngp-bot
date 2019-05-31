@@ -11,7 +11,7 @@ import (
 
 var (
 	searchURL   = "games"
-	searchQuery = "search \"%s\"; fields name,first_release_date,url;"
+	searchQuery = "search \"%s\"; fields name,first_release_date,url; where version_parent = null;"
 )
 
 var client = &http.Client{}
@@ -61,6 +61,11 @@ func Search(gameName string) (GameStruct, error) {
 		var empty GameStruct
 
 		return empty, err
+	}
+
+	if len(games) == 0 {
+		var empty GameStruct
+		return empty, nil
 	}
 
 	game := games[0]
